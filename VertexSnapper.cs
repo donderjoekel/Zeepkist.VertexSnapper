@@ -64,8 +64,7 @@ public class VertexSnapper : MonoBehaviour
     // 5) Unity lifecycle
     private void Awake()
     {
-        string bundlePath = Path.Combine(Path.GetDirectoryName(Plugin.Instance.Info.Location) ?? ".", "assets", "wireframe");
-        WireframeBundleLoader.InitWireframeMaterial(bundlePath);
+        WireframeBundleLoader.InitWireframeMaterial();
         LevelEditorCentral = FindObjectOfType<LEV_LevelEditorCentral>();
     }
 

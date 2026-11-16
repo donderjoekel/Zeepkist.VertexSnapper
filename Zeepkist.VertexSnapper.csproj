@@ -43,9 +43,9 @@
         <Reference Include="Microsoft.CSharp"/>
     </ItemGroup>
 
-    <!-- The plugin loads <plugin dir>/assets/wireframe at runtime -->
+    <!-- The wireframe AssetBundle is embedded and loaded from memory (see Helper/WireframeBundleLoader.cs) -->
     <ItemGroup>
-        <None Update="RuntimeAssets/wireframe" Link="assets/wireframe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"/>
+        <EmbeddedResource Include="RuntimeAssets/wireframe" LogicalName="VertexSnapper.RuntimeAssets.wireframe"/>
     </ItemGroup>
 
     <!-- Local dev only: copy the build into a Windows Zeepkist install. Skipped in CI and when the game isn't installed. -->
@@ -61,8 +61,6 @@
 
         <!-- Copy DLL to the plugin directory -->
         <Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(ZeepkistPluginDir)\$(TargetName)-$(Version).dll&quot;"/>
-        <!-- Copy assets folder recursively -->
-        <Exec Command="xcopy /E /I /Y &quot;$(TargetDir)assets&quot; &quot;$(ZeepkistPluginDir)\assets&quot;"/>
         <!-- Create a zip file from the directory -->
         <Exec Command="powershell -Command &quot;Compress-Archive -Path &quot;&apos;$(ZeepkistPluginDir)\*&apos;&quot; -DestinationPath &quot;&apos;$(ZeepkistPluginDir)-$(Version).zip&apos;&quot; -Force&quot;"/>
     </Target>
