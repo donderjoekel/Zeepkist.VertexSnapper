@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- General Project Properties -->
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <!-- Pinned so the DLL name, BepInEx plugin GUID and MyPluginInfo namespace stay "VertexSnapper" -->
+        <AssemblyName>VertexSnapper</AssemblyName>
+        <RootNamespace>VertexSnapper</RootNamespace>
+        <Description>Cool Stuff</Description>
+        <Version>3.17.5</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <PackageId>VertexSnapper</PackageId>
+        <RestoreAdditionalProjectSources>
+            https://api.nuget.org/v3/index.json;
+            https://nuget.bepinex.dev/v3/index.json;
+            https://nuget.samboy.dev/v3/index.json
+        </RestoreAdditionalProjectSources>
+        <Authors>Thundernerd, Yolo</Authors>
+        <Title>VertexSnapper</Title>
+        <ImplicitUsings>disable</ImplicitUsings>
+    </PropertyGroup>
+
+    <!-- Full PDBs so release builds can convert them to .mdb for Unity's Mono -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+    <!-- Package References: compile-time only, the game and BepInEx provide these at runtime -->
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all" ExcludeAssets="runtime"/>
+        <PackageReference Include="BepInEx.Core" Version="5.*" PrivateAssets="all" ExcludeAssets="runtime"/>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" PrivateAssets="all" ExcludeAssets="runtime"/>
+        <PackageReference Include="Zeepkist.GameLibs" Version="17.32.1912" PrivateAssets="all" ExcludeAssets="runtime"/>
+        <PackageReference Include="ZeepSDK" Version="2.2.0" PrivateAssets="all" ExcludeAssets="runtime"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Microsoft.CSharp"/>
+    </ItemGroup>
+
+    <!-- The plugin loads <plugin dir>/assets/wireframe at runtime -->
+    <ItemGroup>
+        <None Update="RuntimeAssets/wireframe" Link="assets/wireframe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"/>
+    </ItemGroup>
+
+    <!-- Local dev only: copy the build into a Windows Zeepkist install. Skipped in CI and when the game isn't installed. -->
+    <PropertyGroup>
+        <ZeepkistPluginDir>C:\Program Files (x86)\Steam\steamapps\common\Zeepkist\BepInEx\plugins\Sideloaded\Plugins\$(TargetName)</ZeepkistPluginDir>
+    </PropertyGroup>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(OS)' == 'Windows_NT' And '$(CI)' != 'true' And Exists('C:\Program Files (x86)\Steam\steamapps\common\Zeepkist\BepInEx')">
+        <!-- Delete the plugin directory if it exists -->
+        <RemoveDir Directories="$(ZeepkistPluginDir)"/>
+
+        <!-- Create the plugin directory -->
+        <MakeDir Directories="$(ZeepkistPluginDir)"/>
+
+        <!-- Copy DLL to the plugin directory -->
+        <Exec Command="copy /Y &quot;$(TargetDir)$(TargetName).dll&quot; &quot;$(ZeepkistPluginDir)\$(TargetName)-$(Version).dll&quot;"/>
+        <!-- Copy assets folder recursively -->
+        <Exec Command="xcopy /E /I /Y &quot;$(TargetDir)assets&quot; &quot;$(ZeepkistPluginDir)\assets&quot;"/>
+        <!-- Create a zip file from the directory -->
+        <Exec Command="powershell -Command &quot;Compress-Archive -Path &quot;&apos;$(ZeepkistPluginDir)\*&apos;&quot; -DestinationPath &quot;&apos;$(ZeepkistPluginDir)-$(Version).zip&apos;&quot; -Force&quot;"/>
+    </Target>
+
+    <!-- Enable debug logging -->
+    <PropertyGroup>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+    </PropertyGroup>
+</Project>
