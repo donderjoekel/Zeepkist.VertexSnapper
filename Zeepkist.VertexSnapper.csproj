@@ -7,7 +7,7 @@
         <AssemblyName>VertexSnapper</AssemblyName>
         <RootNamespace>VertexSnapper</RootNamespace>
         <Description>Cool Stuff</Description>
-        <Version>3.17.5</Version>
+        <Version>3.17.6</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <PackageId>VertexSnapper</PackageId>
