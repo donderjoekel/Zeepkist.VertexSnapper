@@ -1,0 +1,39 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Which part of the version to bump (from the latest stable tag)
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      stage:
+        description: stable goes to mod.io; alpha/beta/rc only create a GitHub pre-release
+        required: true
+        type: choice
+        default: stable
+        options:
+          - stable
+          - alpha
+          - beta
+          - rc
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    uses: donderjoekel/zeepkist-mod-workflows/.github/workflows/release.yml@v1
+    with:
+      bump: ${{ inputs.bump }}
+      stage: ${{ inputs.stage }}
+      mod-id: 2851202
+    secrets: inherit
